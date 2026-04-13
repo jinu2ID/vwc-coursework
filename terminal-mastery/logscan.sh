@@ -15,8 +15,9 @@ if [[ ! -f "$LOGFILE" ]]; then
     exit 1
 fi
 
-TOTAL=$(wc -l < "$LOGFILE")
+TOTAL=$(wc -l < "$LOGFILE" | tr -d '[:space:]')
 MATCHES=$(grep -c "$PATTERN" "$LOGFILE" || true)
+MATCHES=$(echo "$MATCHES" | tr -d '[:space:]')
 
 echo "File    : $LOGFILE"
 echo "Pattern : $PATTERN"

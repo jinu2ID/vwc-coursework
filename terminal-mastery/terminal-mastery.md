@@ -181,11 +181,13 @@ fi
 ### Count lines and matches
 
 ```bash
-TOTAL=$(wc -l < "$LOGFILE")
+TOTAL=$(wc -l < "$LOGFILE" | tr -d '[:space:]')
 MATCHES=$(grep -c "$PATTERN" "$LOGFILE" || true)
+MATCHES=$(echo "$MATCHES" | tr -d '[:space:]')
 ```
 
 - `wc -l` — counts lines in the file
+- `tr -d '[:space:]'` — trims leading/trailing whitespace (important on some systems like macOS)
 - `$(...)` — runs the command and stores the result in a variable
 - `grep -c` — counts the number of matching lines
 - `|| true` — prevents the script from exiting if grep finds zero matches (`-e` treats a no-match as an error)
@@ -327,3 +329,79 @@ git push origin "$BRANCH"
 ```bash
 echo "Deploy complete!"
 ```
+
+---
+
+## test_logscan.sh
+
+### Assertion helpers
+
+```bash
+function assert_contains() {
+  local haystack="$1"
+  local needle="$2"
+  if [[ "$haystack" != *"$needle"* ]]; then
+    echo "FAIL: Expected output to contain '$needle'"
+    exit 1
+  fi
+}
+```
+
+- `local` — keeps the variable scoped only to this function
+- `[[ "$haystack" != *"$needle"* ]]` — wildcard matching to see if a string exists within another
+- `exit 1` — stops the entire test suite immediately on any failure
+
+---
+
+### Dynamic path discovery
+
+```bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOGSCAN="$SCRIPT_DIR/logscan.sh"
+```
+
+- `${BASH_SOURCE[0]}` — the reliable way to get the script's own path
+- `dirname` — strips the filename to get just the directory
+- `cd ... && pwd` — resolves the absolute path so the test works from any folder
+
+---
+
+### Temporary test data
+
+```bash
+TEMP_LOG=$(mktemp)
+cat <<EOF > "$TEMP_LOG"
+2023-10-27 10:00:01 INFO: System started
+...
+EOF
+```
+
+- `mktemp` — creates a unique, empty temporary file
+- `cat <<EOF` — seeds the file with predictable data to test against
+
+---
+
+### Testing exit codes
+
+```bash
+set +e
+OUTPUT=$("$LOGSCAN" 2>&1)
+EXIT_CODE=$?
+set -e
+assert_exit_code 1 "$EXIT_CODE"
+```
+
+- `set +e` — temporarily allows commands to fail without stopping the script
+- `2>&1` — redirects "stderr" to "stdout" so we can capture error messages
+- `$?` — captures the exit code of the previous command
+- `set -e` — turns safety back on immediately after the check
+
+---
+
+### Cleanup
+
+```bash
+rm "$TEMP_LOG"
+```
+
+Always delete temporary files so you don't clutter the user's `/tmp` directory.
