@@ -239,3 +239,91 @@ Permission characters:
 - `x` — execute
 
 The three groups are: **owner**, **group**, **everyone else**
+
+---
+
+## deploy.sh
+
+### Default branch argument
+
+```bash
+BRANCH="${1:-main}"
+```
+
+No usage check needed — if no argument is passed it defaults to `main`.
+
+---
+
+### Guard: must be in a git repo
+
+```bash
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+  echo "Error: not inside a git repository."
+  exit 1
+fi
+```
+
+- `git rev-parse --git-dir` — checks if you're inside a git repo
+- `> /dev/null 2>&1` — silences output (we only care about the exit code)
+- `!` — inverts the check, so we enter the if block on failure
+
+Catches the error early before wasting time running tests and build.
+
+---
+
+### Guard: no uncommitted changes
+
+```bash
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Error: you have uncommitted changes. Commit or stash them first."
+  exit 1
+fi
+```
+
+- `git diff --quiet` — checks for unstaged changes
+- `git diff --cached --quiet` — checks for staged but uncommitted changes
+- `||` — if either is true, exit
+
+The script assumes you've committed your work beforehand and handles the test → build → push pipeline.
+
+---
+
+### Run tests
+
+```bash
+echo "Running tests..."
+npm test
+```
+
+If tests fail, `set -e` kills the script automatically. Swap `npm test` for your project's test runner (e.g. `pytest`, `go test ./...`).
+
+---
+
+### Build
+
+```bash
+echo "Building..."
+npm run build
+```
+
+Same as tests — if the build fails, `set -e` stops the script.
+
+---
+
+### Push
+
+```bash
+echo "Pushing to '$BRANCH'..."
+git push origin "$BRANCH"
+```
+
+- `origin` — the default name for your remote repository (usually GitHub)
+- `"$BRANCH"` — uses the branch variable set at the top
+
+---
+
+### Success message
+
+```bash
+echo "Deploy complete!"
+```
