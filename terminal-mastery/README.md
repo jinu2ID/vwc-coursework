@@ -72,3 +72,9 @@ Run tests, build, and push. Fails loudly on any error.
 ```bash
 ./deploy.sh staging
 ```
+
+---
+
+## Custom Prompt
+
+![Custom prompt](images/custom_prompt.png)
