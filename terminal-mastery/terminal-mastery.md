@@ -135,3 +135,107 @@ echo "Project '$PROJECT_NAME' created at $(pwd)"
 ```bash
 chmod +x scaffold.sh
 ```
+
+---
+
+## logscan.sh
+
+### Usage check with optional argument
+
+```bash
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <logfile> [pattern]"
+  exit 1
+fi
+```
+
+`[pattern]` in brackets means it's optional — a default is set in the next step.
+
+---
+
+### Store arguments with a default
+
+```bash
+LOGFILE="$1"
+PATTERN="${2:-ERROR}"
+```
+
+- `$1` — the log file path
+- `${2:-ERROR}` — use the second argument if provided, otherwise default to `ERROR`
+
+---
+
+### Check the file exists
+
+```bash
+if [[ ! -f "$LOGFILE" ]]; then
+  echo "Error: file '$LOGFILE' not found."
+  exit 1
+fi
+```
+
+- `! -f` — "not a file" — true if the file doesn't exist
+
+---
+
+### Count lines and matches
+
+```bash
+TOTAL=$(wc -l < "$LOGFILE")
+MATCHES=$(grep -c "$PATTERN" "$LOGFILE" || true)
+```
+
+- `wc -l` — counts lines in the file
+- `$(...)` — runs the command and stores the result in a variable
+- `grep -c` — counts the number of matching lines
+- `|| true` — prevents the script from exiting if grep finds zero matches (`-e` treats a no-match as an error)
+
+---
+
+### Print a summary
+
+```bash
+echo "File    : $LOGFILE"
+echo "Pattern : $PATTERN"
+echo "Total lines : $TOTAL"
+echo "Matches     : $MATCHES"
+```
+
+---
+
+### Print matching lines
+
+```bash
+if [[ "$MATCHES" -eq 0 ]]; then
+  echo "No matches found."
+else
+  grep "$PATTERN" "$LOGFILE" | sort | uniq -c | sort -rn
+fi
+```
+
+- `sort` — alphabetically sorts lines so duplicates are adjacent
+- `uniq -c` — collapses duplicates and prefixes each with a count
+- `sort -rn` — sorts by count, highest first
+
+---
+
+## chmod
+
+```bash
+chmod +x script.sh
+```
+
+Changes the permissions on a file. `+x` adds the execute permission, making it runnable as a script.
+
+View permissions with `ls -la`:
+```
+-rw-r--r--  script.sh   ← before (not executable)
+-rwxr-xr-x  script.sh   ← after (executable)
+```
+
+Permission characters:
+- `r` — read
+- `w` — write
+- `x` — execute
+
+The three groups are: **owner**, **group**, **everyone else**
