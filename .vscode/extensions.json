@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "VetsWhoCode.vetswhocode-extension-pack",
+    "github.copilot",
+    "github.copilot-chat",
+    "anthropic.claude-code",
+    "firefox-devtools.vscode-firefox-debug"
+  ]
+}
