@@ -15,9 +15,8 @@ AGENT_FILES=(
 if [ ! -f "$SOURCE_FILE" ]; then
     echo "Creating initial $SOURCE_FILE..."
     cat <<EOF > "$SOURCE_FILE"
-# AI Agent Rules (Source of Truth)
-- Always use TypeScript for new files.
-- Prefer functional components over classes.
+# AI Agent Instructions
+- Add your stack, conventions, commands, and rules here.
 EOF
 fi
 
