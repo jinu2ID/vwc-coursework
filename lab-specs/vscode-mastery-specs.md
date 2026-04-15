@@ -1,7 +1,7 @@
-- Install the VWC Extension Pack and HashFlag theme
-- Commit a .vscode folder — settings.json, extensions.json, launch.json
-- Configure Copilot (already in the pack) and sign in
-- Write a repo instructions file for stack, conventions, commands, rules
+- Install the VWC Extension Pack and HashFlag theme - Done
+- Commit a .vscode folder — settings.json, extensions.json, launch.json - Done
+- Configure Copilot (already in the pack) and sign in - Done
+- Write a repo instructions file for stack, conventions, commands, rules - Done
 - Run one agent-mode task on a feature branch — small, scoped, specced
 - Review the diff line by line — reject anything you cannot defend
 - Push the branch, open a PR, ship it
